@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sladký E-shop</title>
+    <style>
+        /* Předchozí styly */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+            background: url('https://images.unsplash.com/photo-1546549031-27c832f7e0aa?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed; 
+            background-size: cover; 
+            background-color: #f8d7da; 
+        }
+        .container { padding: 20px; }
+        .product { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin: 10px; 
+            display: inline-block; 
+            width: 200px; 
+            text-align: center; 
+            border-radius: 10px; 
+            background: white; 
+        }
+        .product span {
+            font-size: 60px; 
+        }
+        .cart-icon { 
+            position: fixed; 
+            top: 10px; 
+            right: 10px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            background: white; 
+            padding: 10px; 
+            border-radius: 50%; 
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1); 
+        }
+        .cart-count { 
+            background: red; 
+            color: white; 
+            border-radius: 50%; 
+            padding: 5px 10px; 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+        }
+        .cart { 
+            display: none; 
+            position: fixed; 
+            top: 50px; 
+            right: 10px; 
+            background: white; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.2); 
+            width: 300px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .employee-icon {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .employee-section {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+            width: 300px;
+        }
+        .employee-section input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .employee-section button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .employee-section button:hover {
+            background-color: #45a049;
+        }
+        #orders-list {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        #orders-list li {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        #thank-you-message {
+            display: none;
+            font-size: 18px;
+            color: green;
+        }
+        .contact-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .contact-section h2 {
+            text-align: center;
+        }
+        .contact-section input,
+        .contact-section textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .contact-section button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .contact-section button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Sladký E-shop</h1>
+        <div id="products">
+            <div class="product" data-id="1" data-name="Bonbóny" data-price="50">
+                <span>🍬</span>
+                <h2>Bonbóny</h2>
+                <p>Cena: 50 Kč</p>
+                <button onclick="addToCart(1, 'Bonbóny', 50)">Přidat do košíku</button>
+            </div>
+            <div class="product" data-id="2" data-name="Lízátko" data-price="20">
+                <span>🍭</span>
+                <h2>Lízátko</h2>
+                <p>Cena: 20 Kč</p>
+                <button onclick="addToCart(2, 'Lízátko', 20)">Přidat do košíku</button>
+            </div>
+            <div class="product" data-id="3" data-name="Cupcake" data-price="30">
+                <span>🧁</span>
+                <h2>Cupcake</h2>
+                <p>Cena: 30 Kč</p>
+                <button onclick="addToCart(3, 'Cupcake', 30)">Přidat do košíku</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Košík -->
+    <div class="cart-icon" onclick="toggleCart()">
+        🛒<span id="cart-count" class="cart-count">0</span>
+    </div>
+    
+    <div id="cart" class="cart">
+        <h2>Košík</h2>
+        <ul id="cart-items"></ul>
+        <button onclick="showContactForm()">Pokračovat k objednávce</button>
+    </div>
+    
+    <!-- Ikona zaměstnanců -->
+    <div class="employee-icon" onclick="toggleEmployeeSection()">
+        👨‍💼
+    </div>
+    
+    <!-- Sekce pro zaměstnance -->
+    <div id="employee-section" class="employee-section">
+        <h2>Obsluha - Přihlášení</h2>
+        <input type="password" id="employee-password" placeholder="Zadejte heslo" />
+        <button onclick="checkPassword()">Přihlásit</button>
+        <div id="orders-container" style="display:none;">
+            <button onclick="generateInvoiceExcel()">Stáhnout Excel</button>
+            <h3>Seznam objednávek</h3>
+            <ul id="orders-list"></ul>
+        </div>
+    </div>
+
+    <!-- Zpráva o objednávce -->
+    <div id="thank-you-message">
+        <h2>Děkujeme za objednávku!</h2>
+        <p>Vaše objednávka byla úspěšně odeslána.</p>
+    </div>
+
+    <!-- Kontaktní formulář -->
+    <div class="contact-section" id="contact-section" style="display:none;">
+        <h2>Zadejte své údaje pro objednávku</h2>
+        <form id="contact-form" onsubmit="submitOrder(event)">
+            <input type="text" id="name" placeholder="Vaše jméno a příjmení" required>
+            <input type="email" id="email" placeholder="Váš e-mail" required>
+            <input type="tel" id="phone" placeholder="Vaše telefonní číslo (nepovinné)" maxlength="9" pattern="[0-9]{9}" title="Telefonní číslo musí obsahovat 9 číslic">
+            
+            <h3>Adresa</h3>
+            <input type="text" id="street" placeholder="Ulice" required pattern="[a-zA-Zč Čř Řž Žýá Áí Íé Éö Öú Úů ]+" title="Ulice nesmí obsahovat číslice">
+            <input type="text" id="house-number" placeholder="Číslo popisné" required>
+            <input type="text" id="city" placeholder="Město" required>
+            <input type="text" id="postal-code" placeholder="PSČ" required pattern="\d{5}" title="PSČ musí obsahovat 5 číslic">
+
+            <h3>Fakturační údaje</h3>
+            <input type="text" id="company-name" placeholder="Název společnosti">
+            <input type="text" id="ico" placeholder="IČ" pattern="\d+" title="IČ musí obsahovat pouze číslice">
+            <input type="text" id="dic" placeholder="DIČ">
+
+            <h3>Způsob platby</h3>
+            <label>
+                <input type="radio" name="payment-method" value="bank" required> Bankovní převod
+            </label>
+            <label>
+                <input type="radio" name="payment-method" value="cash" required> Hotově
+            </label>
+
+            <button type="submit">Odeslat objednávku</button>
+        </form>
+    </div>
+
+    <script>
+        let cart = [];
+        let orders = [];
+        let invoiceNumber = 1; // Počáteční číslo faktury
+
+        function addToCart(id, name, price) {
+            cart.push({ id, name, price });
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `${item.name} - ${item.price} Kč <button onclick="removeFromCart(${item.id})">-</button>`;
+                cartItems.appendChild(li);
+            });
+            cartCount.textContent = cart.length;
+        }
+
+        function removeFromCart(id) {
+            const index = cart.findIndex(item => item.id === id);
+            if (index !== -1) {
+                cart.splice(index, 1); // Odstranění položky
+                updateCart();
+            }
+        }
+
+        function toggleCart() {
+            const cartElement = document.getElementById('cart');
+            cartElement.style.display = cartElement.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showContactForm() {
+            document.getElementById('contact-section').style.display = 'block';
+        }
+
+        function submitOrder(event) {
+            event.preventDefault();
+
+            // Sběr údajů z formuláře
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const street = document.getElementById('street').value;
+            const houseNumber = document.getElementById('house-number').value;
+            const city = document.getElementById('city').value;
+            const postalCode = document.getElementById('postal-code').value;
+            const companyName = document.getElementById('company-name').value;
+            const ico = document.getElementById('ico').value;
+            const dic = document.getElementById('dic').value;
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+
+            const order = {
+                invoiceNumber: invoiceNumber++,
+                customerDetails: { name, email, phone },
+                address: { street, houseNumber, city, postalCode },
+                companyDetails: { companyName, ico, dic },
+                paymentMethod,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + item.price, 0),
+                paymentStatus: 'Nesplaceno',
+                paymentDate: new Date().toLocaleDateString(),
+                vatRate: '12%',
+                vatAmount: 0
+            };
+
+            order.vatAmount = order.total * 0.12;
+            orders.push(order);
+
+            // Vymazání košíku
+            cart = [];
+            updateCart();
+
+            // Zobrazení potvrzení
+            document.getElementById('thank-you-message').style.display = 'block';
+            document.getElementById('contact-section').style.display = 'none';
+        }
+
+        function toggleEmployeeSection() {
+            const employeeSection = document.getElementById('employee-section');
+            employeeSection.style.display = employeeSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('employee-password').value;
+            if (password === 'admin123') {
+                document.getElementById('orders-container').style.display = 'block';
+            } else {
+                alert('Neplatné heslo');
+            }
+        }
+
+function generateInvoiceExcel() {
+    const today = new Date();
+    const dueDate = new Date();
+    dueDate.setDate(today.getDate() + 14); // splatnost +14 dní
+
+    const formattedDate = today.toLocaleDateString('cs-CZ');
+    const formattedDueDate = dueDate.toLocaleDateString('cs-CZ');
+
+    const worksheet = XLSX.utils.json_to_sheet(orders.map((order, index) => {
+        // Výpočet základ daně a DPH
+        const zakladDane = (order.total / 1.12).toFixed(2);
+        const dph = (order.total * 0.12).toFixed(2);
+
+        // Počet kusů jednotlivých produktů
+        const bonbonyCount = order.items.filter(item => item.name === 'Bonbóny').length;
+        const lizatkaCount = order.items.filter(item => item.name === 'Lízátko').length;
+        const cupcakyCount = order.items.filter(item => item.name === 'Cupcake').length;
+
+        return {
+            'Číslo dokladu': String(index + 1).padStart(6, '0'), // 000001 atd.
+            'Základ daně': zakladDane,
+            'Způsob platby': order.paymentMethod === 'cash' ? 'Hotově' : 'Příkazem',
+            'Datum vystavení': formattedDate,
+            'Datum splatnosti': formattedDueDate,
+            'Sazba DPH': '12%',
+            'DPH': dph,
+            'IČ': order.companyDetails.ico || '',
+            'DIČ': order.companyDetails.dic || '',
+            'Jméno': order.customerDetails.name,
+            'Název firmy': order.companyDetails.companyName || '',
+            'Ulice': order.address.street + ' ' + order.address.houseNumber,
+            'Město': order.address.city,
+            'Kód státu': 'CZ',
+            'Název státu': 'Česká republika',
+            'Telefon': order.customerDetails.phone || '',
+            'Email': order.customerDetails.email,
+            'Bonbóny (ks)': bonbonyCount,
+            'Lízátka (ks)': lizatkaCount,
+            'Cupcaky (ks)': cupcakyCount,
+            'Cena s DPH': order.total.toFixed(2)
+        };
+    }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, worksheet, 'Objednávky');
+    XLSX.writeFile(wb, 'objednavky.xlsx');
+}
+    </script>
+</body>
+</html>
